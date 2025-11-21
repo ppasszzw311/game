@@ -59,6 +59,9 @@ export class GameEngine {
         let outs = 0;
         let inningRuns = 0;
         const log: string[] = [];
+        let batterIndex = 0;
+
+        const bases = [...gameState.bases];
 
         // Get current pitcher (simplified: assume first in rotation for now)
         // Fallback to a dummy pitcher if roster is empty (e.g. mock data)
@@ -75,28 +78,43 @@ export class GameEngine {
         while (outs < 3 && safetyCounter < 20) {
             safetyCounter++;
 
-            // Get current batter (simplified: random for now)
-            const batter = battingTeam.roster[Math.floor(Math.random() * battingTeam.roster.length)];
+            // Get current batter using lineup order
+            const batterId = battingTeam.lineup[batterIndex % Math.max(1, battingTeam.lineup.length)];
+            const batter = battingTeam.roster.find(p => p.id === batterId) || battingTeam.roster[0];
+            batterIndex++;
 
             if (!batter || !pitcher) {
                 // Fallback for empty rosters
                 outs++;
+                log.push(`Auto-out (no players available) — outs: ${outs}`);
                 continue;
             }
 
             const result = this.simulateAtBat(pitcher, batter);
 
-            log.push(`${batter.lastName}: ${result.detail}`);
+            log.push(`${batter.lastName}: ${result.detail} (outs: ${outs + result.outs})`);
 
             if (result.type === 'OUT') {
                 outs += result.outs;
             } else if (result.type === 'HR') {
-                inningRuns += 1 + gameState.bases.filter(b => b !== null).length;
-                // Clear bases (simplified)
+                inningRuns += 1 + bases.filter(b => b !== null).length;
+                bases[0] = bases[1] = bases[2] = null;
             } else if (result.type === 'HIT') {
                 // Simplified base running: random chance to score
-                if (Math.random() > 0.7) {
-                    inningRuns += 1;
+                if (Math.random() > 0.7) inningRuns += 1;
+                // Move a random runner forward one base if available
+                const runnerIndex = bases.findIndex(b => b !== null);
+                if (runnerIndex !== -1) {
+                    const target = runnerIndex + 1;
+                    if (target >= 3) {
+                        inningRuns += 1;
+                        bases[runnerIndex] = null;
+                    } else {
+                        bases[target] = bases[runnerIndex];
+                        bases[runnerIndex] = null;
+                    }
+                } else {
+                    bases[0] = batter.id;
                 }
             }
         }
@@ -127,8 +145,8 @@ export class GameEngine {
             inning: nextInning,
             isTop: nextIsTop,
             score: newScore,
-            outs: 0,
-            bases: [null, null, null],
+            outs,
+            bases,
             log: [...gameState.log, ...log]
         };
     }
