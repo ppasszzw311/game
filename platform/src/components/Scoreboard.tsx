@@ -24,22 +24,22 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ gameState, homeTeam, awa
                 <div style={{ background: 'rgba(15,23,42,0.9)', borderRadius: '8px 0 0 8px', display: 'grid', placeItems: 'center', fontSize: '18px', letterSpacing: '0.08em' }}>{awayTeam.abbreviation}</div>
                 {innings.map(inn => (
                     <div key={inn} style={{ background: 'rgba(15,23,42,0.9)', display: 'grid', placeItems: 'center', fontSize: '18px' }}>
-                        {gameState.inning >= inn ? (gameState.score.away > 0 && inn === 1 ? gameState.score.away : 0) : ''}
+                        {gameState.scoreByInning.away[inn - 1] !== undefined && (gameState.inning > inn || (gameState.inning === inn && !gameState.isTop)) ? gameState.scoreByInning.away[inn - 1] : (gameState.inning === inn && gameState.isTop ? gameState.scoreByInning.away[inn - 1] : '')}
                     </div>
                 ))}
                 <div style={{ background: 'rgba(15,23,42,0.9)', color: '#fbbf24', fontSize: '18px', display: 'grid', placeItems: 'center' }}>{gameState.score.away}</div>
-                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center' }}>0</div>
-                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center', borderRadius: '0 8px 8px 0' }}>0</div>
+                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center' }}>{gameState.stats.away.hits}</div>
+                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center', borderRadius: '0 8px 8px 0' }}>{gameState.stats.away.errors}</div>
 
                 <div style={{ background: 'rgba(15,23,42,0.9)', borderRadius: '8px 0 0 8px', display: 'grid', placeItems: 'center', fontSize: '18px', letterSpacing: '0.08em' }}>{homeTeam.abbreviation}</div>
                 {innings.map(inn => (
                     <div key={inn} style={{ background: 'rgba(15,23,42,0.9)', display: 'grid', placeItems: 'center', fontSize: '18px' }}>
-                        {gameState.inning >= inn || (gameState.inning === inn && gameState.isTop === false) ? (gameState.score.home > 0 && inn === 1 ? gameState.score.home : 0) : ''}
+                        {gameState.scoreByInning.home[inn - 1] !== undefined && gameState.inning >= inn ? gameState.scoreByInning.home[inn - 1] : ''}
                     </div>
                 ))}
                 <div style={{ background: 'rgba(15,23,42,0.9)', color: '#fbbf24', fontSize: '18px', display: 'grid', placeItems: 'center' }}>{gameState.score.home}</div>
-                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center' }}>0</div>
-                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center', borderRadius: '0 8px 8px 0' }}>0</div>
+                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center' }}>{gameState.stats.home.hits}</div>
+                <div style={{ background: 'rgba(15,23,42,0.9)', fontSize: '18px', display: 'grid', placeItems: 'center', borderRadius: '0 8px 8px 0' }}>{gameState.stats.home.errors}</div>
             </div>
         </div>
     );

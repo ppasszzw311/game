@@ -3,7 +3,7 @@ import { GameCanvas } from '../components/GameCanvas';
 import { GameEngine } from '../utils/engine';
 import { Scoreboard } from '../components/Scoreboard';
 import { MatchResult } from '../components/MatchResult';
-import type { GameState, Team } from '../types/baseball';
+import type { GameState, Team, PitchType } from '../types/baseball';
 
 // Mock Data for Demo
 const buildPlayer = (id: string, firstName: string, lastName: string, power: number, contact: number, control = 55) => ({
@@ -73,6 +73,8 @@ const initialGameState: GameState = {
     inning: 1,
     isTop: true,
     score: { home: 0, away: 0 },
+    scoreByInning: { home: Array(9).fill(0), away: Array(9).fill(0) },
+    stats: { home: { hits: 0, errors: 0 }, away: { hits: 0, errors: 0 } },
     outs: 0,
     balls: 0,
     strikes: 0,

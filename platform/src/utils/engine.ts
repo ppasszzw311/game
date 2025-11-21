@@ -67,6 +67,8 @@ export class GameEngine {
 
         const bases: (string | null)[] = [null, null, null];
 
+        let inningHits = 0;
+
         // Get current pitcher (simplified: assume first in rotation for now)
         // Fallback to a dummy pitcher if roster is empty (e.g. mock data)
         const pitcher = pitchingTeam.roster.find(p => p.id === pitchingTeam.rotation[0]) || pitchingTeam.roster[0];
@@ -101,9 +103,11 @@ export class GameEngine {
             if (result.type === 'OUT') {
                 outs += result.outs;
             } else if (result.type === 'HR') {
+                inningHits++;
                 inningRuns += 1 + bases.filter(b => b !== null).length;
                 bases[0] = bases[1] = bases[2] = null;
             } else if (result.type === 'HIT') {
+                inningHits++;
                 // Simplified base running: random chance to score
                 if (Math.random() > 0.7) inningRuns += 1;
                 // Move a random runner forward one base if available
@@ -129,12 +133,21 @@ export class GameEngine {
             log.push(`${battingTeam.name} scores ${inningRuns} run(s)!`);
         }
 
-        // Update Score
+        // Update Score and Stats
         const newScore = { ...gameState.score };
+        const newScoreByInning = { ...gameState.scoreByInning };
+        const newStats = { ...gameState.stats };
+
         if (isTop) {
             newScore.away += inningRuns;
+            newScoreByInning.away = [...gameState.scoreByInning.away];
+            newScoreByInning.away[gameState.inning - 1] = inningRuns;
+            newStats.away = { ...gameState.stats.away, hits: gameState.stats.away.hits + inningHits };
         } else {
             newScore.home += inningRuns;
+            newScoreByInning.home = [...gameState.scoreByInning.home];
+            newScoreByInning.home[gameState.inning - 1] = inningRuns;
+            newStats.home = { ...gameState.stats.home, hits: gameState.stats.home.hits + inningHits };
         }
 
         // Switch Inning/Side
@@ -151,6 +164,8 @@ export class GameEngine {
             inning: nextInning,
             isTop: nextIsTop,
             score: newScore,
+            scoreByInning: newScoreByInning,
+            stats: newStats,
             outs: 0,
             bases: [null, null, null],
             log: [...gameState.log, ...log]

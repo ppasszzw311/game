@@ -81,6 +81,14 @@ export interface GameState {
         home: number;
         away: number;
     };
+    scoreByInning: {
+        home: number[];
+        away: number[];
+    };
+    stats: {
+        home: { hits: number; errors: number };
+        away: { hits: number; errors: number };
+    };
     log: string[];
 }
 
