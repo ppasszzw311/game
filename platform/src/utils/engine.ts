@@ -25,8 +25,9 @@ export class GameEngine {
         }
 
         // Base hit chance (simplified 0-100 scale)
-        let hitChance = (contact + vision * 0.5) - (effectiveControl * 0.7);
-        hitChance = Math.max(5, Math.min(60, hitChance + 25)); // Normalize to 5% - 60% range
+        // Tuned so typical matchups hover around ~30% hit rate
+        const rawHitChance = (contact * 0.3 + vision * 0.2) - (effectiveControl * 0.25);
+        const hitChance = Math.max(5, Math.min(40, rawHitChance)); // Normalize to 5% - 40% range
 
         const roll = Math.random() * 100;
 
