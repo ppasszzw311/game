@@ -3,7 +3,7 @@ import { GameCanvas } from '../components/GameCanvas';
 import { GameEngine } from '../utils/engine';
 import { Scoreboard } from '../components/Scoreboard';
 import { MatchResult } from '../components/MatchResult';
-import type { GameState, Team, PitchType } from '../types/baseball';
+import type { GameState, Team } from '../types/baseball';
 
 // Mock Data for Demo
 const buildPlayer = (id: string, firstName: string, lastName: string, power: number, contact: number, control = 55) => ({
