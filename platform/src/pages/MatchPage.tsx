@@ -6,14 +6,67 @@ import { MatchResult } from '../components/MatchResult';
 import type { GameState, Team } from '../types/baseball';
 
 // Mock Data for Demo
+const buildPlayer = (id: string, firstName: string, lastName: string, power: number, contact: number, control = 55) => ({
+    id,
+    firstName,
+    lastName,
+    age: 26,
+    primaryPosition: 'P' as const,
+    secondaryPositions: [],
+    attributes: {
+        contact,
+        power,
+        vision: Math.max(50, contact - 5),
+        speed: 60,
+        fielding: 55,
+        arm: 60,
+        reaction: 58,
+        velocity: 90,
+        control,
+        stamina: 70,
+        breaking: 65
+    },
+    pitchTypes: ['FourSeam', 'Slider'] as PitchType[],
+    condition: 3,
+    fatigue: 10
+});
+
+const homeLineup = [
+    buildPlayer('p1', 'Ken', 'Suzuki', 70, 65),
+    buildPlayer('p2', 'Daiki', 'Mori', 60, 72),
+    buildPlayer('p3', 'Ryo', 'Tanaka', 80, 68),
+    buildPlayer('p4', 'Shin', 'Kato', 75, 62),
+    buildPlayer('p5', 'Yuki', 'Sato', 55, 66),
+    buildPlayer('p6', 'Tomo', 'Hayashi', 58, 60),
+    buildPlayer('p7', 'Aoi', 'Kawamura', 52, 64),
+    buildPlayer('p8', 'Jun', 'Okada', 50, 58),
+    buildPlayer('p9', 'Leo', 'Nakamura', 48, 55)
+];
+
+const awayLineup = [
+    buildPlayer('r1', 'Chris', 'Walker', 68, 63, 60),
+    buildPlayer('r2', 'Alex', 'Lopez', 62, 70, 62),
+    buildPlayer('r3', 'Brian', 'Kim', 78, 66, 58),
+    buildPlayer('r4', 'Evan', 'Davis', 74, 64, 64),
+    buildPlayer('r5', 'Tyler', 'Nguyen', 60, 62, 59),
+    buildPlayer('r6', 'Owen', 'Fisher', 55, 60, 57),
+    buildPlayer('r7', 'Mason', 'Hill', 58, 58, 56),
+    buildPlayer('r8', 'Eli', 'Carter', 52, 57, 55),
+    buildPlayer('r9', 'Noah', 'Price', 50, 55, 55)
+];
+
 const mockHomeTeam: Team = {
     id: 'h1', name: 'Power Pros', abbreviation: 'PRO', color: '#0055aa',
-    roster: [], lineup: [], rotation: []
+    roster: homeLineup,
+    lineup: homeLineup.map(p => p.id),
+    rotation: [homeLineup[0].id]
 };
 
 const mockAwayTeam: Team = {
     id: 'a1', name: 'Rivals', abbreviation: 'RIV', color: '#dd2200',
-    roster: [], lineup: [], rotation: []
+    roster: awayLineup,
+    lineup: awayLineup.map(p => p.id),
+    rotation: [awayLineup[0].id]
 };
 
 const initialGameState: GameState = {
