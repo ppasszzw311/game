@@ -37,18 +37,14 @@ export class SeasonManager {
 
         let currentTeamIds = [...teamIds];
 
+        const matchups: { home: string; away: string }[] = [];
+
         for (let round = 0; round < rounds; round++) {
             for (let i = 0; i < gamesPerRound; i++) {
                 const home = currentTeamIds[i];
                 const away = currentTeamIds[numTeams - 1 - i];
 
-                schedule.push({
-                    id: `g-${round}-${i}`,
-                    day: round + 1,
-                    homeTeamId: home,
-                    awayTeamId: away,
-                    isPlayed: false
-                });
+                matchups.push({ home, away });
             }
 
             // Rotate (keep index 0 fixed, rotate rest)
@@ -56,6 +52,23 @@ export class SeasonManager {
             const rotated = currentTeamIds.slice(1);
             rotated.unshift(rotated.pop()!);
             currentTeamIds = [fixed, ...rotated];
+        }
+
+        // Repeat matchups until we reach 100 games
+        let day = 1;
+        while (schedule.length < 100) {
+            matchups.forEach((matchup, idx) => {
+                if (schedule.length < 100) {
+                    schedule.push({
+                        id: `g-${day}-${idx}`,
+                        day,
+                        homeTeamId: matchup.home,
+                        awayTeamId: matchup.away,
+                        isPlayed: false
+                    });
+                }
+            });
+            day++;
         }
 
         return schedule;
