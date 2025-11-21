@@ -55,13 +55,17 @@ export class GameEngine {
         }
     }
 
-    static simulateInning(gameState: GameState, battingTeam: Team, pitchingTeam: Team): GameState {
+    static simulateInning(gameState: GameState, homeTeam: Team, awayTeam: Team): GameState {
+        const isTop = gameState.isTop;
+        const battingTeam = isTop ? awayTeam : homeTeam;
+        const pitchingTeam = isTop ? homeTeam : awayTeam;
+
         let outs = 0;
         let inningRuns = 0;
-        const log: string[] = [];
+        const log: string[] = [`${isTop ? 'Top' : 'Bottom'} ${gameState.inning}: ${battingTeam.name} at bat`];
         let batterIndex = 0;
 
-        const bases = [...gameState.bases];
+        const bases: (string | null)[] = [null, null, null];
 
         // Get current pitcher (simplified: assume first in rotation for now)
         // Fallback to a dummy pitcher if roster is empty (e.g. mock data)
@@ -119,13 +123,15 @@ export class GameEngine {
             }
         }
 
+        log.push(`Half-inning over — ${outs} outs recorded.`);
+
         if (inningRuns > 0) {
             log.push(`${battingTeam.name} scores ${inningRuns} run(s)!`);
         }
 
         // Update Score
         const newScore = { ...gameState.score };
-        if (gameState.isTop) {
+        if (isTop) {
             newScore.away += inningRuns;
         } else {
             newScore.home += inningRuns;
@@ -133,20 +139,20 @@ export class GameEngine {
 
         // Switch Inning/Side
         let nextInning = gameState.inning;
-        let nextIsTop = gameState.isTop;
+        let nextIsTop = isTop;
 
-        if (!gameState.isTop) {
+        if (!isTop) {
             nextInning++;
         }
-        nextIsTop = !gameState.isTop;
+        nextIsTop = !isTop;
 
         return {
             ...gameState,
             inning: nextInning,
             isTop: nextIsTop,
             score: newScore,
-            outs,
-            bases,
+            outs: 0,
+            bases: [null, null, null],
             log: [...gameState.log, ...log]
         };
     }
