@@ -4,7 +4,6 @@ import { GameEngine } from '../utils/engine';
 import { Scoreboard } from '../components/Scoreboard';
 import { MatchResult } from '../components/MatchResult';
 import type { GameState, Team } from '../types/baseball';
-import { Position } from '../types/baseball';
 
 // Mock Data for Demo
 const mockHomeTeam: Team = {
@@ -41,51 +40,34 @@ export const MatchPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-300 to-green-300 p-4 flex flex-col items-center">
-            {/* Header Bar */}
-            <div className="w-full max-w-6xl bg-gradient-to-r from-blue-600 to-blue-400 text-white p-2 rounded-t-lg shadow-lg mb-4 flex justify-between items-center px-6 border-b-4 border-blue-800">
-                <h1 className="text-2xl font-bold italic tracking-wider drop-shadow-md">MATCH RESULT</h1>
-                <div className="text-sm font-mono bg-blue-800 px-3 py-1 rounded">EXHIBITION</div>
+        <div style={{ minHeight: '80vh', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '100%', maxWidth: '1080px', background: 'linear-gradient(120deg,#2563eb,#0ea5e9)', color: '#fff', padding: '12px 24px', borderRadius: '18px', boxShadow: '0 20px 40px rgba(0,0,0,0.35)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h1 style={{ margin: 0, fontSize: '24px', fontStyle: 'italic', letterSpacing: '0.08em' }}>MATCH RESULT</h1>
+                <div style={{ fontFamily: 'monospace', background: 'rgba(15,23,42,0.4)', padding: '6px 12px', borderRadius: '10px' }}>EXHIBITION</div>
             </div>
 
-            <div className="w-full max-w-6xl space-y-6">
-                {/* Scoreboard */}
+            <div style={{ width: '100%', maxWidth: '1080px', display: 'grid', gap: '18px' }}>
                 <Scoreboard gameState={gameState} homeTeam={mockHomeTeam} awayTeam={mockAwayTeam} />
 
-                {/* Main Game Area */}
-                <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
-                    {/* Game Canvas */}
-                    <div className="bg-white p-2 rounded-xl shadow-xl border-4 border-white">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '16px', alignItems: 'start' }}>
+                    <div style={{ background: '#fff', padding: '12px', borderRadius: '16px', boxShadow: '0 18px 40px rgba(0,0,0,0.2)' }}>
                         <GameCanvas gameState={gameState} />
                     </div>
 
-                    {/* Controls & Log */}
-                    <div className="bg-white/90 p-4 rounded-xl shadow-xl w-full max-w-md border-4 border-white h-[400px] flex flex-col">
-                        <div className="flex justify-between mb-4">
-                            <button
-                                onClick={simulateInning}
-                                className="bg-pawapuro-yellow text-black font-bold py-3 px-6 rounded-full shadow-lg hover:bg-yellow-400 transform transition hover:scale-105 border-2 border-yellow-600"
-                            >
-                                Simulate Inning
-                            </button>
-                            <button
-                                onClick={resetGame}
-                                className="bg-gray-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-gray-600 transform transition hover:scale-105 border-2 border-gray-700"
-                            >
-                                Reset
-                            </button>
+                    <div style={{ background: 'rgba(255,255,255,0.92)', padding: '16px', borderRadius: '16px', boxShadow: '0 18px 40px rgba(0,0,0,0.2)', border: '3px solid #e2e8f0', height: '400px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+                            <button onClick={simulateInning} className="btn-main" style={{ flex: 1 }}>Simulate Inning</button>
+                            <button onClick={resetGame} className="btn-ghost" style={{ flex: 1 }}>Reset</button>
                         </div>
-
-                        <div className="flex-1 overflow-y-auto bg-gray-100 rounded p-2 border-inner shadow-inner font-mono text-sm">
-                            {gameState.log.length === 0 && <div className="text-gray-400 text-center mt-10">Game Start!</div>}
+                        <div style={{ flex: 1, overflowY: 'auto', background: '#f8fafc', borderRadius: '12px', padding: '10px', fontFamily: 'monospace', fontSize: '13px', border: '1px solid #e2e8f0' }}>
+                            {gameState.log.length === 0 && <div style={{ color: '#94a3b8', textAlign: 'center', marginTop: '24px' }}>Game Start!</div>}
                             {gameState.log.map((log, i) => (
-                                <div key={i} className="mb-1 border-b border-gray-200 pb-1">{log}</div>
+                                <div key={i} style={{ marginBottom: '6px', paddingBottom: '6px', borderBottom: '1px solid #e2e8f0' }}>{log}</div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Match Result Panel */}
                 <MatchResult gameState={gameState} homeTeam={mockHomeTeam} awayTeam={mockAwayTeam} />
             </div>
         </div>
