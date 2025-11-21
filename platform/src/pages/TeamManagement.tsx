@@ -44,14 +44,14 @@ export const TeamManagement: React.FC = () => {
         }
     };
 
-    if (!team) return <div>Loading Team...</div>;
+    if (!team) return <div className="text-center text-slate-200">Loading Team...</div>;
 
     const pitchers = team.roster.filter(p => p.primaryPosition === 'P');
     const fielders = team.roster.filter(p => p.primaryPosition !== 'P');
     const displayedPlayers = activeTab === 'pitchers' ? pitchers : fielders;
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
+        <div className="space-y-6">
             {isEditingLineup && (
                 <LineupEditor
                     team={team}
@@ -60,39 +60,26 @@ export const TeamManagement: React.FC = () => {
                 />
             )}
 
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-power-blue">{team.name} Management</h2>
-                <div className="space-x-2">
-                    <button
-                        onClick={() => setIsEditingLineup(true)}
-                        className="bg-power-yellow hover:bg-yellow-500 px-4 py-2 rounded font-bold text-black shadow transition"
-                    >
-                        Edit Lineup
-                    </button>
-                    <button className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded font-bold text-gray-700">
-                        Edit Rotation
-                    </button>
+            <div className="panel-header" style={{ alignItems: 'flex-start' }}>
+                <div>
+                    <div className="panel-subtitle" style={{ marginBottom: '8px' }}>Team Control</div>
+                    <h2 style={{ margin: 0, fontSize: '30px', color: '#fff' }}>{team.name}</h2>
+                    <p style={{ color: '#d9e5ff', marginTop: '4px' }}>設定先發陣容、檢視投打能力，打造你的冠軍隊伍。</p>
+                </div>
+                <div className="cta-row">
+                    <button onClick={() => setIsEditingLineup(true)} className="btn-main">編輯打線</button>
+                    <button className="btn-ghost">編輯投手輪值</button>
                 </div>
             </div>
 
             {/* Tabs */}
-            <div className="flex space-x-1 mb-6 border-b border-gray-300">
-                <button
-                    onClick={() => setActiveTab('fielders')}
-                    className={`px-6 py-3 font-bold rounded-t-lg transition ${activeTab === 'fielders' ? 'bg-white border-t border-l border-r border-gray-300 text-power-blue' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                >
-                    Fielders
-                </button>
-                <button
-                    onClick={() => setActiveTab('pitchers')}
-                    className={`px-6 py-3 font-bold rounded-t-lg transition ${activeTab === 'pitchers' ? 'bg-white border-t border-l border-r border-gray-300 text-power-blue' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                >
-                    Pitchers
-                </button>
+            <div className="tab-row">
+                <button onClick={() => setActiveTab('fielders')} className={activeTab === 'fielders' ? 'active' : ''}>Fielders</button>
+                <button onClick={() => setActiveTab('pitchers')} className={activeTab === 'pitchers' ? 'active' : ''}>Pitchers</button>
             </div>
 
             {/* Roster Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid-players">
                 {displayedPlayers.map(player => (
                     <PlayerCard key={player.id} player={player} />
                 ))}
