@@ -104,6 +104,25 @@ export interface GameSchedule {
     };
 }
 
+export interface PlayerBattingSeason {
+    games: number;
+    atBats: number;
+    hits: number;
+    rbi: number;
+}
+
+export interface PlayerPitchingSeason {
+    appearances: number;
+    inningsPitched: number; // Can be partial (e.g. 5.2)
+    runsAllowed: number;
+    strikeouts: number;
+}
+
+export interface PlayerSeasonStats {
+    batting: PlayerBattingSeason;
+    pitching: PlayerPitchingSeason;
+}
+
 export interface Season {
     id: string;
     year: number;
@@ -111,6 +130,7 @@ export interface Season {
     teams: Team[];
     schedule: GameSchedule[];
     standings: { [teamId: string]: TeamStats };
+    playerStats: { [playerId: string]: PlayerSeasonStats };
 }
 
 export interface TeamStats {

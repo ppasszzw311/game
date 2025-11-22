@@ -18,7 +18,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw Field (Simplified)
-        ctx.fillStyle = '#228822'; // Grass
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, '#0f5132');
+        gradient.addColorStop(1, '#198754');
+        ctx.fillStyle = gradient; // Grass gradient
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Infield Dirt
@@ -42,23 +45,29 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ gameState }) => {
             // Draw runner if base is occupied
             // Note: gameState.bases is [1st, 2nd, 3rd]
             if (index < 3 && gameState.bases[index]) {
-                ctx.fillStyle = 'red';
+                ctx.fillStyle = '#f97316';
                 ctx.beginPath();
-                ctx.arc(base.x, base.y, 8, 0, Math.PI * 2);
+                ctx.arc(base.x, base.y, 10, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = 'white'; // Reset for next base
             }
         });
 
+        // Home plate highlight
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(bases[3].x - 12, bases[3].y - 12, 24, 24);
+
         // Draw Scoreboard
-        ctx.fillStyle = 'black';
-        ctx.fillRect(10, 10, 150, 80);
+        ctx.fillStyle = 'rgba(15,23,42,0.85)';
+        ctx.fillRect(10, 10, 200, 100);
         ctx.fillStyle = 'white';
         ctx.font = '16px monospace';
-        ctx.fillText(`HOME: ${gameState.score.home}`, 20, 30);
-        ctx.fillText(`AWAY: ${gameState.score.away}`, 20, 50);
-        ctx.fillText(`OUTS: ${gameState.outs}`, 20, 70);
-        ctx.fillText(`${gameState.isTop ? 'TOP' : 'BOT'} ${gameState.inning}`, 80, 70);
+        ctx.fillText(`HOME: ${gameState.score.home}`, 20, 35);
+        ctx.fillText(`AWAY: ${gameState.score.away}`, 20, 55);
+        ctx.fillText(`OUTS: ${Math.min(3, gameState.outs)}`, 20, 75);
+        ctx.fillText(`${gameState.isTop ? 'TOP' : 'BOT'} ${gameState.inning}`, 20, 95);
+        ctx.fillText(`Bases: ${gameState.bases.map(b => (b ? '●' : '○')).join(' ')}`, 90, 75);
 
     }, [gameState]);
 

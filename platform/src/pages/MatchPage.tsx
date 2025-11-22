@@ -114,6 +114,29 @@ export const MatchPage: React.FC = () => {
                             <button onClick={simulateInning} className="btn-main" style={{ flex: 1 }}>Simulate Inning</button>
                             <button onClick={resetGame} className="btn-ghost" style={{ flex: 1 }}>Reset</button>
                         </div>
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div className="info-chip" style={{ flex: 1, margin: 0, background: '#0ea5e9', color: '#fff' }}>
+                                <div className="panel-subtitle" style={{ color: '#e2e8f0' }}>Outs</div>
+                                <div style={{ fontSize: '24px', fontWeight: 800 }}>{Math.min(3, gameState.outs)}</div>
+                            </div>
+                            <div className="info-chip" style={{ flex: 2, margin: 0, background: '#f1f5f9' }}>
+                                <div className="panel-subtitle" style={{ color: '#475569' }}>Bases</div>
+                                <div style={{ display: 'flex', gap: '6px' }}>
+                                    {['1B', '2B', '3B'].map((label, idx) => (
+                                        <div key={label} style={{
+                                            padding: '4px 8px',
+                                            borderRadius: '10px',
+                                            background: gameState.bases[idx] ? '#f97316' : '#e2e8f0',
+                                            color: gameState.bases[idx] ? '#fff' : '#475569',
+                                            minWidth: '42px',
+                                            textAlign: 'center'
+                                        }}>
+                                            {label}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                         <div style={{ flex: 1, overflowY: 'auto', background: '#f8fafc', borderRadius: '12px', padding: '10px', fontFamily: 'monospace', fontSize: '13px', border: '1px solid #e2e8f0' }}>
                             {gameState.log.length === 0 && <div style={{ color: '#94a3b8', textAlign: 'center', marginTop: '24px' }}>Game Start!</div>}
                             {gameState.log.map((log, i) => (

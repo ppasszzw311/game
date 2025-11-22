@@ -1,4 +1,4 @@
-import type { Team, Season, GameSchedule, TeamStats } from '../types/baseball';
+import type { Team, Season, GameSchedule, TeamStats, PlayerSeasonStats } from '../types/baseball';
 import { GameEngine } from './engine';
 
 export class SeasonManager {
@@ -6,6 +6,7 @@ export class SeasonManager {
     static createSeason(year: number, teams: Team[]): Season {
         const schedule = this.generateRoundRobinSchedule(teams);
         const standings: { [teamId: string]: TeamStats } = {};
+        const playerStats = this.buildPlayerStatsMap(teams);
 
         teams.forEach(team => {
             standings[team.id] = {
@@ -20,8 +21,22 @@ export class SeasonManager {
             currentDay: 1,
             teams,
             schedule,
-            standings
+            standings,
+            playerStats
         };
+    }
+
+    private static buildPlayerStatsMap(teams: Team[]): { [playerId: string]: PlayerSeasonStats } {
+        const map: { [playerId: string]: PlayerSeasonStats } = {};
+        teams.forEach(team => {
+            team.roster.forEach(player => {
+                map[player.id] = {
+                    batting: { games: 0, atBats: 0, hits: 0, rbi: 0 },
+                    pitching: { appearances: 0, inningsPitched: 0, runsAllowed: 0, strikeouts: 0 }
+                };
+            });
+        });
+        return map;
     }
 
     static generateRoundRobinSchedule(teams: Team[]): GameSchedule[] {
@@ -77,13 +92,14 @@ export class SeasonManager {
     static simulateDay(season: Season): Season {
         const todaysGames = season.schedule.filter(g => g.day === season.currentDay && !g.isPlayed);
         const newStandings = { ...season.standings };
+        const updatedPlayerStats = { ...(season.playerStats ?? this.buildPlayerStatsMap(season.teams)) };
 
         todaysGames.forEach(game => {
             const homeTeam = season.teams.find(t => t.id === game.homeTeamId)!;
             const awayTeam = season.teams.find(t => t.id === game.awayTeamId)!;
 
-            // Simulate Game (Quick Sim)
-            const result = GameEngine.simulateGame(homeTeam, awayTeam); // Need to implement simulateGame in Engine first
+            // Simulate Game (Quick Sim with box score)
+            const result = GameEngine.simulateGame(homeTeam, awayTeam);
 
             // Update Schedule
             game.isPlayed = true;
@@ -108,12 +124,48 @@ export class SeasonManager {
                 homeStats.ties++;
                 awayStats.ties++;
             }
+
+            // Update Player Season Stats
+            Object.entries(result.batting).forEach(([playerId, stats]) => {
+                if (!updatedPlayerStats[playerId]) {
+                    updatedPlayerStats[playerId] = {
+                        batting: { games: 0, atBats: 0, hits: 0, rbi: 0 },
+                        pitching: { appearances: 0, inningsPitched: 0, runsAllowed: 0, strikeouts: 0 }
+                    };
+                }
+                const seasonStats = updatedPlayerStats[playerId];
+                seasonStats.batting.games += stats.atBats > 0 ? 1 : 0;
+                seasonStats.batting.atBats += stats.atBats;
+                seasonStats.batting.hits += stats.hits;
+                seasonStats.batting.rbi += stats.rbi;
+            });
+
+            Object.entries(result.pitching).forEach(([playerId, stats]) => {
+                if (!updatedPlayerStats[playerId]) {
+                    updatedPlayerStats[playerId] = {
+                        batting: { games: 0, atBats: 0, hits: 0, rbi: 0 },
+                        pitching: { appearances: 0, inningsPitched: 0, runsAllowed: 0, strikeouts: 0 }
+                    };
+                }
+                const seasonStats = updatedPlayerStats[playerId];
+                seasonStats.pitching.appearances += stats.inningsPitched > 0 ? 1 : 0;
+                seasonStats.pitching.inningsPitched += stats.inningsPitched;
+                seasonStats.pitching.runsAllowed += stats.runsAllowed;
+                seasonStats.pitching.strikeouts += stats.strikeouts;
+            });
         });
 
         return {
             ...season,
             currentDay: season.currentDay + 1,
-            standings: newStandings
+            standings: newStandings,
+            playerStats: updatedPlayerStats
         };
+    }
+
+    static ensurePlayerStats(season: Season): Season {
+        if (season.playerStats) return season;
+        const playerStats = this.buildPlayerStatsMap(season.teams);
+        return { ...season, playerStats };
     }
 }
