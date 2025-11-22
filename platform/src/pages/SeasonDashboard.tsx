@@ -20,17 +20,21 @@ const generateMockTeams = (count: number): Team[] => {
 
 export const SeasonDashboard: React.FC = () => {
     const [season, setSeason] = useState<Season | null>(null);
+    const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
     useEffect(() => {
         // Try loading first
         const savedSeason = StorageManager.loadSeason();
         if (savedSeason) {
-            setSeason(savedSeason);
+            const ensured = SeasonManager.ensurePlayerStats(savedSeason);
+            setSeason(ensured);
+            setSelectedTeamId(ensured.teams[0]?.id ?? null);
         } else {
             // Initialize New Season
             const teams = generateMockTeams(4); // 4 Teams
             const newSeason = SeasonManager.createSeason(2024, teams);
             setSeason(newSeason);
+            setSelectedTeamId(newSeason.teams[0]?.id ?? null);
             StorageManager.saveSeason(newSeason);
         }
     }, []);
@@ -46,6 +50,34 @@ export const SeasonDashboard: React.FC = () => {
     if (!season) return <div className="text-center text-slate-200">Loading Season...</div>;
 
     const sortedStandings = Object.entries(season.standings).sort(([, a], [, b]) => b.wins - a.wins);
+
+    const teamOptions = season.teams.map(team => ({ value: team.id, label: team.name }));
+    const selectedTeam = season.teams.find(t => t.id === selectedTeamId) || season.teams[0];
+
+    const battingRows = selectedTeam?.roster.map(player => {
+        const stats = season.playerStats[player.id];
+        const batting = stats?.batting ?? { games: 0, atBats: 0, hits: 0, rbi: 0 };
+        const avg = stats && stats.batting.atBats > 0
+            ? (stats.batting.hits / stats.batting.atBats).toFixed(3)
+            : '.000';
+        return {
+            name: `${player.firstName} ${player.lastName}`,
+            ...batting,
+            avg
+        };
+    }) || [];
+
+    const pitchingRows = selectedTeam?.roster.map(player => {
+        const stats = season.playerStats[player.id];
+        const pitching = stats?.pitching ?? { appearances: 0, inningsPitched: 0, runsAllowed: 0, strikeouts: 0 };
+        const ip = stats?.pitching.inningsPitched ?? 0;
+        const era = ip > 0 ? ((stats?.pitching.runsAllowed ?? 0) * 9 / ip).toFixed(2) : '—';
+        return {
+            name: `${player.firstName} ${player.lastName}`,
+            ...pitching,
+            era
+        };
+    }) || [];
 
     return (
         <div className="space-y-8">
@@ -134,6 +166,86 @@ export const SeasonDashboard: React.FC = () => {
                                 </div>
                             );
                         })}
+                    </div>
+                </div>
+            </div>
+
+            <div className="feature-card" style={{ borderRadius: '18px' }}>
+                <div className="panel-header" style={{ marginBottom: '8px' }}>
+                    <div>
+                        <h3 style={{ margin: 0, color: '#fff' }}>球員賽季數據</h3>
+                        <p style={{ color: '#cbd5e1', margin: 0 }}>打數 / 安打 / 打點、投球局數 / 失分 / 三振</p>
+                    </div>
+                    <select
+                        value={selectedTeam?.id}
+                        onChange={e => setSelectedTeamId(e.target.value)}
+                        className="btn-ghost"
+                        style={{ minWidth: '200px' }}
+                    >
+                        {teamOptions.map(option => (
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                        <div className="panel-subtitle" style={{ marginBottom: '6px' }}>打者</div>
+                        <div className="table-wrapper">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>球員</th>
+                                        <th>G</th>
+                                        <th>AB</th>
+                                        <th>H</th>
+                                        <th>RBI</th>
+                                        <th>AVG</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {battingRows.map(row => (
+                                        <tr key={row.name}>
+                                            <td className="font-bold">{row.name}</td>
+                                            <td>{row.games ?? 0}</td>
+                                            <td>{row.atBats ?? 0}</td>
+                                            <td>{row.hits ?? 0}</td>
+                                            <td>{row.rbi ?? 0}</td>
+                                            <td>{row.avg}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="panel-subtitle" style={{ marginBottom: '6px' }}>投手</div>
+                        <div className="table-wrapper">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>球員</th>
+                                        <th>G</th>
+                                        <th>IP</th>
+                                        <th>R</th>
+                                        <th>K</th>
+                                        <th>ERA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pitchingRows.map(row => (
+                                        <tr key={row.name}>
+                                            <td className="font-bold">{row.name}</td>
+                                            <td>{row.appearances ?? 0}</td>
+                                            <td>{(row.inningsPitched ?? 0).toFixed ? row.inningsPitched.toFixed(1) : '0.0'}</td>
+                                            <td>{row.runsAllowed ?? 0}</td>
+                                            <td>{row.strikeouts ?? 0}</td>
+                                            <td>{row.era}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
